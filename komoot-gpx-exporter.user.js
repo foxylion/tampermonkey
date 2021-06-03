@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Komoot GPX Exporter
 // @namespace    http://tampermonkey.net/
-// @version      1.2
+// @version      1.3
 // @description  allows to export routes as a GPX file
 // @author       foxylion
 // @include      https://www.komoot.*/*
@@ -9,20 +9,22 @@
 // ==/UserScript==
 
 (function () {
-    const createXmlString = (title, lines) => {
+    const createXmlString = (title, coordinates, pois, highlights) => {
         let result = '<gpx xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd" version="1.1" creator="runtracker">\n';
         result += '<metadata/>\n';
         result += `<trk><name>${title}</name><desc></desc>\n`;
         result += '<trkseg>\n';
-        result += lines.map((point) => `<trkpt lat="${point.lat}" lon="${point.lng}"><ele>${point.alt}</ele></trkpt>`).join('\n');
-        result += '</trkseg>\n';
+        result += coordinates.map((point) => `<trkpt lat="${point.lat}" lon="${point.lng}"><ele>${point.alt}</ele></trkpt>`).join('\n');
+        result += '\n</trkseg>\n';
         result += '</trk>\n';
-        result += '</gpx>';
+        result += pois.map((poi) => `<wpt lat="${poi.location.lat}" lon="${poi.location.lng}"><name>${poi.name}</name></wpt>`).join('\n');
+        result += '\n';
+        result += highlights.map((highlight) => `<wpt lat="${highlight.mid_point.lat}" lon="${highlight.mid_point.lng}"><name>${highlight.name}</name></wpt>`).join('\n');
+        result += '\n</gpx>';
         return result;
     }
 
-    const downloadGpxFile = (title, lines) => {
-        const xml = createXmlString(title, lines);
+    const downloadGpxFile = (title, xml) => {
         const url = 'data:text/json;charset=utf-8,' + xml;
         const link = document.createElement('a');
         link.download = `${title}.gpx`;
@@ -44,6 +46,9 @@
         const store = kmtBoot.getProps().page.store;
         const title = store.moc[`//api.komoot.de/v007/${type}/${id}`].attributes.name;
         const coordinates = store.moc[`//api.komoot.de/v007/${type}/${id}/coordinates`].attributes.items;
-        downloadGpxFile(title, coordinates);
+        const pois = Object.keys(store.moc).filter(key => key.match(/.*pois\/[a-z0-9]+$/i)).map(key => store.moc[key].attributes);
+        const highlights = Object.keys(store.moc).filter(key => key.match(/.*highlights\/[a-z0-9]+$/i)).map(key => store.moc[key].attributes);
+        const xml = createXmlString(title, coordinates, pois, highlights);
+        downloadGpxFile(title, xml);
     };
 })();
