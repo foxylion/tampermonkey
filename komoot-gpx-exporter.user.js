@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Komoot GPX Exporter
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.2
 // @description  allows to export routes as a GPX file
 // @author       foxylion
 // @include      https://www.komoot.*/*
@@ -39,9 +39,11 @@
     html.innerHTML = '<button style="background-color: #fff; padding: 5px;margin-top: 5px;border-radius:3px" id="export-gpx">Export GPX</button>';
     document.body.append(html);
     document.getElementById('export-gpx').onclick = function () {
-        const [_, id] = window.location.href.match(/\/smarttour\/([0-9]+)/);
-        const title =  kmtBoot.getProps().page.store.moc[`//api.komoot.de/v007/smart_tours/${id}`].attributes.name;
-        const coordinates = kmtBoot.getProps().page.store.moc[`//api.komoot.de/v007/smart_tours/${id}/coordinates`].attributes.items;
+        const [all , g1, smart, id] = window.location.href.match(/\/((smart)?tour)\/([0-9]+)/);
+        const type = smart ? 'smart_tours' : 'tours';
+        const store = kmtBoot.getProps().page.store;
+        const title = store.moc[`//api.komoot.de/v007/${type}/${id}`].attributes.name;
+        const coordinates = store.moc[`//api.komoot.de/v007/${type}/${id}/coordinates`].attributes.items;
         downloadGpxFile(title, coordinates);
     };
 })();
