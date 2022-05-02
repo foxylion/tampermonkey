@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Komoot GPX Exporter
 // @namespace    http://tampermonkey.net/
-// @version      1.3
+// @version      1.4
 // @description  allows to export routes as a GPX file
 // @author       foxylion
 // @include      https://www.komoot.*/*
@@ -44,7 +44,7 @@
         const [all , g1, smart, id] = window.location.href.match(/\/((smart)?tour)\/([0-9]+)/);
         const type = smart ? 'smart_tours' : 'tours';
         const store = kmtBoot.getProps().page.store;
-        const title = store.moc[`//api.komoot.de/v007/${type}/${id}`].attributes.name;
+        const title = document.title.split("|")[0].trim();
         const coordinates = store.moc[`//api.komoot.de/v007/${type}/${id}/coordinates`].attributes.items;
         const pois = Object.keys(store.moc).filter(key => key.match(/.*pois\/[a-z0-9]+$/i)).map(key => store.moc[key].attributes);
         const highlights = Object.keys(store.moc).filter(key => key.match(/.*highlights\/[a-z0-9]+$/i)).map(key => store.moc[key].attributes);
