@@ -9,17 +9,10 @@
 // ==/UserScript==
 
 (function () {
-    const escapeXml = (unsafe) => {
-        return unsafe.replace(/[<>&'"#]/g, (c) => {
-            switch (c) {
-                case '<': return '&lt;';
-                case '>': return '&gt;';
-                case '&': return '&amp;';
-                case '\'': return '&apos;';
-                case '"': return '&quot;';
-                case '#': return '&num;';
-            }
-        });
+    const escapeXml = (data) => {
+        var d = document.createElement('div');
+        d.appendChild(document.createTextNode(data));
+        return d.innerHTML;
     };
 
     const createXmlString = (title, coordinates, pois, highlights) => {
@@ -38,7 +31,7 @@
     }
 
     const downloadGpxFile = (title, xml) => {
-        const url = 'data:text/json;charset=utf-8,' + xml;
+        const url = 'data:text/json;charset=utf-8,' + encodeURIComponent(xml);
         const link = document.createElement('a');
         link.download = `${title}.gpx`;
         link.href = url;
