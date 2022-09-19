@@ -17,7 +17,7 @@
                 case '&': return '&amp;';
                 case '\'': return '&apos;';
                 case '"': return '&quot;';
-                case '#': return '&#35;';
+                case '#': return '&num;';
             }
         });
     };
